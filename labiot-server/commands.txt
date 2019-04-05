@@ -1,0 +1,52 @@
+############
+# TUTORIAL
+############
+http://manpages.ubuntu.com/manpages/cosmic/man5/coap-client.5.html#examples
+
+############
+# WEEL KNONW
+############
+coap-client -m get coap://[::1]/.well-known/core
+
+############
+# COAP POST
+############
+
+#########
+#CONFIG
+coap-client -m post coap://127.0.0.1/app-config -e "{'temperature':{'min':'15','max':'35'},'humidity':{'min':'15','max':'35'}}"
+coap-client -m post coap://127.0.0.1/app-config/temperature -e "{ 'min' = '15'; 'max' = '35' }"
+coap-client -m post coap://127.0.0.1/app-config/humidity -e "{ 'min' = '15'; 'max' = '35' }"
+
+#########
+# SENSORS (NOT USED)
+# coap-client -m post coap://127.0.0.1/sensors -e "{'temperature': { 'value': 25.0, 'timestamp':'2019-04-05 10:44:55'} ,'humidity': { 'value': 55.0, 'timestamp':'2019-04-05 10:44:55'} , 'timestamp':'2019-04-05 10:44:55'}"
+# coap-client -m post coap://127.0.0.1/sensors/temperature -e "{'value': 25.0, 'timestamp':'2019-04-05 10:44:55'}"
+# coap-client -m post coap://127.0.0.1/sensors/humidity -e "{'value': 25.0, 'timestamp':'2019-04-05 10:44:55'}"
+
+#########
+# ACTUATORS
+coap-client -m post coap://127.0.0.1/actuators/led -e "{'temperature-led': {'state': 'HIGH'},'humidity-led': {'state': 'HIGH'}}"
+coap-client -m post coap://127.0.0.1/actuators/led/temperature -e "{'state': 'LOW'}"
+coap-client -m post coap://127.0.0.1/actuators/led/humidity -e "{'state': 'LOW'}"
+
+############
+# COAP GET
+############
+
+#########
+coap-client -m get coap://127.0.0.1/app-config/*
+coap-client -m get coap://127.0.0.1/app-config/temperature
+coap-client -m get coap://127.0.0.1/app-config/humidity
+
+#########
+coap-client -m get coap://127.0.0.1/sensors/*
+coap-client -m get coap://127.0.0.1/sensors/temperature
+coap-client -m get coap://127.0.0.1/sensors/humidity
+
+#########
+coap-client -m get coap://127.0.0.1/actuators/led/*
+coap-client -m get coap://127.0.0.1/actuators/led/temperature
+coap-client -m get coap://127.0.0.1/actuators/led/humidity
+
+
