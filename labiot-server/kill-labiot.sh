@@ -1,1 +1,0 @@
-/usr/bin/killall -9 $(ps aux | grep "labiot" | awk '{print $2}')

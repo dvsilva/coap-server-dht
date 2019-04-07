@@ -1,0 +1,10 @@
+JENKINS CONF
+
+github project:
+https://github.com/dvsilva/coap-server-dht/
+
+build shell
+/usr/bin/killall -9 $(ps aux | grep "labiot" | awk '{print $2}') &
+
+execute shell
+java -jar /root/.jenkins/workspace/labiot/git-coap-server/labiot-server/target/labiot-0.0.1-SNAPSHOT-jar-with-dependencies.jar
