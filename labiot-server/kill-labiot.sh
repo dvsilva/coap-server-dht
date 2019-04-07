@@ -1,3 +1,1 @@
-#!/bin/sh 
-
-sudo kill -9 $(sudo ps aux | grep "labiot" | grep -v 'grep' | awk '{print $0}')
+/usr/bin/killall -9 $(ps aux | grep "labiot" | awk '{print $2}')
