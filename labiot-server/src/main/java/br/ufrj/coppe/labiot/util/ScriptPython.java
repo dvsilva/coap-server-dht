@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets;
 
 public class ScriptPython implements Runnable {
 
-	private static final String SCRIPT_PYTHON = "/home/pi/Desktop/trabalho/AdafruitDHT.py";
+	private static final String SCRIPT_PYTHON = "AdafruitDHT.py";
 	private static final String TYPE_SENSOR = "11";
 	private static final String GPIO_PIN = "4";
 
