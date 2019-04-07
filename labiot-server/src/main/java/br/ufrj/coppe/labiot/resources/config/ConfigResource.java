@@ -53,11 +53,15 @@ public class ConfigResource extends CoapResource {
 		String response = this.getName() + " has been configured to " + jsonInString;
 		exchange.respond(ResponseCode.CONTENT, response, MediaTypeRegistry.TEXT_PLAIN);
 	}
-	
-	public String getConfigJson() {
-		String jsonInString = gson.toJson(this.config);
-		return jsonInString;
+
+	@Override
+	public void changed() {
+		super.changed();
+		
+		AppConfigResource parent = (AppConfigResource) this.getParent();
+		parent.changed();
 	}
+
 
 	public Config getConfig() {
 		return config;

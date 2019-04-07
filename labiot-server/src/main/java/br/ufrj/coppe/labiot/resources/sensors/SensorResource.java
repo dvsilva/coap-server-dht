@@ -4,33 +4,33 @@ import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.server.resources.CoapExchange;
-import org.eclipse.californium.core.server.resources.Resource;
 
 import com.google.gson.Gson;
 
 import br.ufrj.coppe.labiot.domain.DHTSensor;
+import br.ufrj.coppe.labiot.domain.EnvPropertieType;
 import br.ufrj.coppe.labiot.util.DataUtil;
 
 public class SensorResource extends CoapResource {
 
-	private static final String RESOURCE_TEMP_NAME = "temperature";
-	private static final String RESOURCE_HUM_NAME = "humidity";
-
 	private Gson gson;
 	
-	private SensorObservableResource temperature;
-	private SensorObservableResource humidity;
+	private DTHObservableResource temperature;
+	private DTHObservableResource humidity;
 
 	public SensorResource(String name) {
 		super(name);
 
 		this.gson = new Gson(); // Or use new GsonBuilder().create();
 		
-		this.temperature = new SensorObservableResource(RESOURCE_TEMP_NAME);
-		this.humidity = new SensorObservableResource(RESOURCE_HUM_NAME);
+		this.temperature = new DTHObservableResource(EnvPropertieType.TEMPERATURE.getName());
+		this.humidity = new DTHObservableResource(EnvPropertieType.HUMIDITY.getName());
 		
 		this.setObservable(true);
 		this.getAttributes().setObservable();
+		
+		add(this.temperature);
+		add(this.humidity);
 	}
 	
 	@Override
@@ -57,23 +57,21 @@ public class SensorResource extends CoapResource {
 		String response = getName() + " has been configured to " + jsonInString;
 		exchange.respond(ResponseCode.CONTENT, response, MediaTypeRegistry.TEXT_PLAIN);
 	}
-	
-	@Override
-	public Resource getChild(String name) {
-		Resource res = null;
-		
-		switch (name) {
-			case RESOURCE_TEMP_NAME:
-				res = temperature;
-				break;
-			case RESOURCE_HUM_NAME:
-				res = humidity;
-				break;
-			default:
-				res = this;
-		}
-		
-		return res;
+
+	public DTHObservableResource getTemperature() {
+		return temperature;
 	}
 
+	public void setTemperature(DTHObservableResource temperature) {
+		this.temperature = temperature;
+	}
+
+	public DTHObservableResource getHumidity() {
+		return humidity;
+	}
+
+	public void setHumidity(DTHObservableResource humidity) {
+		this.humidity = humidity;
+	}
+	
 }

@@ -28,7 +28,7 @@ public class LEDConfigClient implements CoapHandler {
 	@Override 
 	public void onLoad(CoapResponse response) {
 		String content = response.getResponseText();
-		System.out.println("CONFIGURATION RESPONSE FROM " + appConfigPath + ": " + content);
+		//System.out.println("CONFIGURATION RESPONSE FROM " + appConfigPath + ": " + content);
 		this.config = gson.fromJson(content, Config.class);
 	}
 

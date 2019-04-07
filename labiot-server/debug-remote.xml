@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="deploy" default="remotedebug" basedir=".">
-  <!-- <property name="raspberrypi" value="192.168.1.2" />  -->
-  <property name="raspberrypi" value="10.0.0.230" />
+  <!-- <property name="raspberrypi" value="10.0.0.230" /> -->
+	
+  <property name="raspberrypi" value="192.168.1.2" /> 
   <property name="raspberryfolder" value="~/Desktop/trabalho" />
   <property name="username" value="pi" />
   <property name="password" value="raspberry" />

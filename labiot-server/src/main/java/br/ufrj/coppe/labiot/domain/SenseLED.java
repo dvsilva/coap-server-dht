@@ -4,10 +4,10 @@ import com.google.gson.annotations.SerializedName;
 
 public class SenseLED {
 
-	@SerializedName("temperature-led")
+	@SerializedName("temperature_led")
 	private LED temperatureLed;
 	
-	@SerializedName("humidity-led")
+	@SerializedName("humidity_led")
 	private LED humidityLed;
 
 	public SenseLED(LED temperatureLed, LED humidityLed) {

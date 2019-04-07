@@ -4,16 +4,13 @@ import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.server.resources.CoapExchange;
-import org.eclipse.californium.core.server.resources.Resource;
 
 import com.google.gson.Gson;
 
 import br.ufrj.coppe.labiot.domain.AppConfig;
+import br.ufrj.coppe.labiot.domain.EnvPropertieType;
 
 public class AppConfigResource extends CoapResource {
-
-	private static final String RESOURCE_TEMP_NAME = "temperature";
-	private static final String RESOURCE_HUM_NAME = "humidity";
 
 	private Gson gson;
 	
@@ -25,11 +22,14 @@ public class AppConfigResource extends CoapResource {
 
 		this.gson = new Gson(); // Or use new GsonBuilder().create();
 		
-		this.temperatureConfig = new ConfigResource(RESOURCE_TEMP_NAME);
-		this.humidityConfig = new ConfigResource(RESOURCE_HUM_NAME);
+		this.temperatureConfig = new ConfigResource(EnvPropertieType.TEMPERATURE.getName());
+		this.humidityConfig = new ConfigResource(EnvPropertieType.HUMIDITY.getName());
 		
 		this.setObservable(true);
 		this.getAttributes().setObservable();
+
+		add(this.temperatureConfig);
+		add(this.humidityConfig);
 	}
 	
 	@Override
@@ -56,22 +56,5 @@ public class AppConfigResource extends CoapResource {
 		String response = getName() + " has been configured to " + jsonInString;
 		exchange.respond(ResponseCode.CONTENT, response, MediaTypeRegistry.TEXT_PLAIN);
 	}
-	@Override
-	public Resource getChild(String name) {
-		Resource res = null;
-		
-		switch (name) {
-			case RESOURCE_TEMP_NAME:
-				res = temperatureConfig;
-				break;
-			case RESOURCE_HUM_NAME:
-				res = humidityConfig;
-				break;
-			default:
-				res = this;
-		}
-		
-		return res;
-	}
-
+	
 }

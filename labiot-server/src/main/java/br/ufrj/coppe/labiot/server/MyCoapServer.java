@@ -8,14 +8,14 @@ import br.ufrj.coppe.labiot.resources.sensors.SensorResource;
 
 public class MyCoapServer extends CoapServer {
 
-	//public static String coap_path = "coap://192.168.1.2:5683/";
+	public static String coap_path = "coap://192.168.1.2:5683/";
 	//public static String coap_path = "coap://10.0.0.230:5683/";
-	public static final String coap_path = "coap://127.0.0.1:5683/";
+	//public static final String coap_path = "coap://127.0.0.1:5683/";
 	
 	public static final String resource_app_config = "app-config";
-	
 	public static final String resource_sensors = "sensors";
 	public static final String resource_actuators = "actuators";
+	public static final String resource_led = "led";
 	
 	public static final String app_config_path = coap_path + resource_app_config;
 	public static final String sensors_path = coap_path + resource_sensors;
@@ -24,7 +24,7 @@ public class MyCoapServer extends CoapServer {
 
 		MyCoapServer server = new MyCoapServer();
 
-		// all -- {"temperature":{"min":"15","max":"35"},"humidity":{"min":"15","max":"35"}}
+		// all -- {"temperature":{"min":"15","max":"35"},"humidity":{"min":"50","max":"80"}}
 		// foreach --{min: 20; max:30 }
 		AppConfigResource configRes = new AppConfigResource(resource_app_config);
 		server.add(configRes);
@@ -36,7 +36,7 @@ public class MyCoapServer extends CoapServer {
 		
 		// all - {"temperature-led":{"state":"LOW"},"humidity-led":{"state":"HIGH"}}
 		// foreach -- {"state":"LOW"}
-		ActuatorResource actuatorResource = new ActuatorResource(resource_actuators, app_config_path, sensors_path);
+		ActuatorResource actuatorResource = new ActuatorResource(resource_actuators, resource_led, app_config_path, sensors_path);
 		server.add(actuatorResource);
 		
 		server.start();

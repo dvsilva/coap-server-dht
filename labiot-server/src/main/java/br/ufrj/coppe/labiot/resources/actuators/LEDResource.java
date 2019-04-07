@@ -1,7 +1,6 @@
 package br.ufrj.coppe.labiot.resources.actuators;
 
 import java.util.Timer;
-import java.util.TimerTask;
 
 import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
@@ -9,158 +8,103 @@ import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 
 import com.google.gson.Gson;
+import com.pi4j.io.gpio.RaspiPin;
 
-import br.ufrj.coppe.labiot.domain.LED;
-import br.ufrj.coppe.labiot.domain.Sensor;
+import br.ufrj.coppe.labiot.domain.EnvPropertieType;
+import br.ufrj.coppe.labiot.domain.SenseLED;
+import br.ufrj.coppe.labiot.resources.tasks.PulseLEDTask;
 
 public class LEDResource extends CoapResource {
 
-	private static final long TIME_TO_UPDATE = 1500;
-	
-	private LED led;
+	private static final long TIME_TO_UPDATE = 1000;
+
 	private Gson gson;
 	
-	private LEDSensorClient sensorClient;
+	private LEDPropertieResource temperatureLed;
+	private LEDPropertieResource humidityLed;
 
-	private String sensorPath;
-	private String appConfigPath;
-
-	private boolean blink;
-
-	public LEDResource(String name, String sensorPath, String appConfigPath) {
+	public LEDResource(String name, String appConfigPath, String sensorsPath) {
 		super(name);
-		this.sensorPath = sensorPath;
-		this.appConfigPath = appConfigPath;
-		
-		this.gson = new Gson(); // Or use new GsonBuilder().create();
-		this.led = new LED();
 
-		this.sensorClient = new LEDSensorClient(sensorPath, appConfigPath);
+		this.gson = new Gson(); // Or use new GsonBuilder().create();
+		
+		this.temperatureLed = new LEDPropertieResource(RaspiPin.GPIO_01, EnvPropertieType.TEMPERATURE.getName(), sensorsPath, appConfigPath);
+		this.humidityLed = new LEDPropertieResource(RaspiPin.GPIO_04, EnvPropertieType.HUMIDITY.getName(),  sensorsPath, appConfigPath);
+		
+		this.setObservable(true);
+		this.getAttributes().setObservable();
+		
+		add(this.temperatureLed);
+		add(this.humidityLed);
+
+		PulseLEDTask blinkLEDTask = new PulseLEDTask(this);
 		
 		Timer timer = new Timer();
-		timer.schedule(new TurnOnTask(this), 0, TIME_TO_UPDATE);
+		timer.schedule(blinkLEDTask, 0, TIME_TO_UPDATE);
 	}
 
 	@Override
 	public void handleGET(CoapExchange exchange) {
-		String jsonInString = gson.toJson(this.led);
+		SenseLED senseLED = new SenseLED(this.temperatureLed.getLED(), this.humidityLed.getLED());
+		String jsonInString = gson.toJson(senseLED);
 		exchange.respond(ResponseCode.CONTENT, jsonInString, MediaTypeRegistry.TEXT_PLAIN);
 	}
 
 	@Override
 	public void handlePOST(CoapExchange exchange) {
 		String request = exchange.getRequestText();
-		this.led = gson.fromJson(request, LED.class);
+		SenseLED senseLED = gson.fromJson(request, SenseLED.class);
+		
+		String temperatureLEDState = senseLED.getTemperatureLed().getState();
+		String humidityLedState = senseLED.getHumidityLed().getState();
+		update(temperatureLEDState, humidityLedState);
 		
 		this.changed();
 		
-		String jsonInString = gson.toJson(this.led);
-		String response = this.getName() + " has been ledured to " + jsonInString;
+		String jsonInString = gson.toJson(senseLED);
+		String response = getName() + " has been configured to " + jsonInString;
 		exchange.respond(ResponseCode.CONTENT, response, MediaTypeRegistry.TEXT_PLAIN);
 	}
 
+	public void update(String tempLedState, String humLedState) {
+		this.temperatureLed.update(tempLedState);
+		this.humidityLed.update(humLedState);
+	}
+	
 	@Override
-	public void handlePUT(CoapExchange exchange) {		
-		String request = exchange.getRequestText();
-		this.led = gson.fromJson(request, LED.class);
+	public void changed() {
+		super.changed();
 		
-		this.changed();
-
-		String jsonInString = gson.toJson(this.led);
-		String response = this.getName() + " has been ledured to " + jsonInString;
-		exchange.respond(ResponseCode.CONTENT, response, MediaTypeRegistry.TEXT_PLAIN);
-	}
-	
-	private class TurnOnTask extends TimerTask {
-		
-		private CoapResource mCoapRes;
-
-		public TurnOnTask(CoapResource coapRes) {
-			mCoapRes = coapRes;
-		}
-
-		@Override
-		public void run() {
-		
-			if(sensorClient.isConfigured() && sensorClient.hasValue()) {
-				if(!blink) {
-					//System.out.println(sensorPath + " - " + blink + " " + led.getState());
-					
-					Sensor sensor = sensorClient.getSensor();
-					Float value = sensor.getValue();
-					
-					if(value != null) {			
-						if(sensorClient.isValueHigherThan() && isOff()) {
-							//System.out.println("acender led " + sensorPath + " - " + appConfigPath);
-							turnOn();
-							mCoapRes.changed();
-						}
-						else if(sensorClient.isValueLowerThanMax() && isOn()) {
-							//System.out.println("apagar led " + sensorPath + " - " + appConfigPath);
-							turnOff();
-							mCoapRes.changed();
-						}
-					}
-				}
-				else {
-					if(isOff())
-						turnOn();
-					
-					//System.out.println("blinking " + led.getState());
-				}
-			}
-		}
-	}
-	
-	public String getLEDJson() {
-		String jsonInString = gson.toJson(this.led);
-		return jsonInString;
+		ActuatorResource parent = (ActuatorResource) this.getParent();
+		parent.changed();
 	}
 
-	public LED getLED() {
-		return led;
+	public LEDPropertieResource getTemperatureLed() {
+		return temperatureLed;
 	}
 
-	public void setLED(LED led) {
-		this.led = led;
+	public void setTemperatureLed(LEDPropertieResource temperatureLed) {
+		this.temperatureLed = temperatureLed;
 	}
 
-	public boolean isBlink() {
-		return blink;
+	public LEDPropertieResource getHumidityLed() {
+		return humidityLed;
 	}
 
-	public void setBlink(boolean blink) {
-		this.blink = blink;
+	public void setHumidityLed(LEDPropertieResource humidityLed) {
+		this.humidityLed = humidityLed;
 	}
 
-	public LEDSensorClient getSensorClient() {
-		return sensorClient;
+	public void setLED(SenseLED senseLED) {
+		this.temperatureLed.setLED(senseLED.getTemperatureLed());
+		this.humidityLed.setLED(senseLED.getHumidityLed());		
+
+		update(this.temperatureLed.getLED().getState(), this.humidityLed.getLED().getState());
 	}
 
-	public void setSensorClient(LEDSensorClient sensorClient) {
-		this.sensorClient = sensorClient;
-	}
-
-	public void turnOn() {
-		//System.out.println("--> GPIO state should be: ON");
-		//pin.high();
-		this.led.setState("HIGH");
-	}
-
-	public void turnOff() {
-		//System.out.println("--> GPIO state should be: OFF");
-		//pin.low();
-		this.led.setState("LOW");
-	}
-	
-	public boolean isOn() {
-		//return pin.getState() == PinState.HIGH;
-		return this.led.getState() != null ? this.led.getState().equalsIgnoreCase("HIGH") : false;
-	}
-
-	public boolean isOff() {
-		//return pin.getState() == PinState.LOW;
-		return this.led.getState() != null ? this.led.getState().equalsIgnoreCase("LOW") : true;
+	public SenseLED getLED() {
+		SenseLED senseLED = new SenseLED(this.temperatureLed.getLED(), this.humidityLed.getLED());
+		return senseLED;
 	}
 
 }

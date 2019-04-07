@@ -1,8 +1,6 @@
 package br.ufrj.coppe.labiot.resources.sensors;
 
-import java.util.Random;
 import java.util.Timer;
-import java.util.TimerTask;
 
 import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
@@ -11,18 +9,17 @@ import org.eclipse.californium.core.server.resources.CoapExchange;
 
 import com.google.gson.Gson;
 
-import br.ufrj.coppe.labiot.domain.DHTSensor;
 import br.ufrj.coppe.labiot.domain.Sensor;
-import br.ufrj.coppe.labiot.util.DataUtil;
+import br.ufrj.coppe.labiot.resources.tasks.DTHSensorTask;
 
-public class SensorObservableResource extends CoapResource {
+public class DTHObservableResource extends CoapResource {
 
 	private static final long TIME_TO_UPDATE = 2000;
 	
 	private Sensor sensor;
 	private Gson gson;
-
-	public SensorObservableResource(String name) {
+	
+	public DTHObservableResource(String name) {
 		super(name);
 		
 		this.gson = new Gson(); // Or use new GsonBuilder().create();
@@ -30,9 +27,11 @@ public class SensorObservableResource extends CoapResource {
 		
 		this.setObservable(true);
 		this.getAttributes().setObservable();
+
+		DTHSensorTask dthSensorTask = new DTHSensorTask(this, this.sensor);
 		
-		//Timer timer = new Timer();
-		//timer.schedule(new UpdateTask(this), 0, TIME_TO_UPDATE);
+		Timer timer = new Timer();
+		timer.schedule(dthSensorTask, 0, TIME_TO_UPDATE);
 	}
 
 	@Override
@@ -44,9 +43,7 @@ public class SensorObservableResource extends CoapResource {
 	@Override
 	public void handlePOST(CoapExchange exchange) {
 		String request = exchange.getRequestText();
-		
 		this.sensor = gson.fromJson(request, Sensor.class);
-		
 		this.changed();
 		
 		String jsonInString = gson.toJson(this.sensor);
@@ -54,32 +51,14 @@ public class SensorObservableResource extends CoapResource {
 		exchange.respond(ResponseCode.CONTENT, response, MediaTypeRegistry.TEXT_PLAIN);
 	}
 	
-	private class UpdateTask extends TimerTask {
-		private CoapResource mCoapRes;
-
-		public UpdateTask(CoapResource coapRes) {
-			mCoapRes = coapRes;
-		}
-
-		@Override
-		public void run() {
-			Random rand = new Random();
-			Float value = rand.nextFloat();
-			//Float value = 40.0f;
-			
-			sensor.setValue(value);
-			sensor.setTimestamp(DataUtil.getFormattedTimestamp());
-			
-			//System.out.println(gson.toJson(sensor));
-			mCoapRes.changed();
-		}
+	@Override
+	public void changed() {
+		super.changed();
+		
+		SensorResource parent = (SensorResource) this.getParent();
+		parent.changed();
 	}
-
-	public String getSensorJson() {
-		String jsonInString = gson.toJson(this.sensor);
-		return jsonInString;
-	}
-
+	
 	public Sensor getSensor() {
 		return sensor;
 	}
@@ -87,5 +66,5 @@ public class SensorObservableResource extends CoapResource {
 	public void setSensor(Sensor sensor) {
 		this.sensor = sensor;
 	}
-	
+
 }
