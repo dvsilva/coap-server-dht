@@ -8,7 +8,8 @@ import java.nio.charset.StandardCharsets;
 
 public class ScriptPython implements Runnable {
 
-	private static final String SCRIPT_PYTHON = "AdafruitDHT.py";
+	private static final String PYTHON_SHELL = "python";
+	private static final String SCRIPT_PYTHON = "/home/pi/Desktop/trabalho/AdafruitDHT.py";
 	private static final String TYPE_SENSOR = "11";
 	private static final String GPIO_PIN = "4";
 
@@ -25,7 +26,7 @@ public class ScriptPython implements Runnable {
 		Process process;
 
 		try {
-			process = Runtime.getRuntime().exec(new String[] { SCRIPT_PYTHON, TYPE_SENSOR, GPIO_PIN });
+			process = Runtime.getRuntime().exec(new String[] { PYTHON_SHELL, SCRIPT_PYTHON, TYPE_SENSOR, GPIO_PIN });
 			mProcess = process;
 		} catch (Exception e) {
 			System.out.println("Exception Raised" + e.toString());
