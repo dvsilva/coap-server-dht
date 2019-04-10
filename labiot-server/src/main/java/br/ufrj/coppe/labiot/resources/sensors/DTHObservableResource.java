@@ -19,38 +19,62 @@ public class DTHObservableResource extends CoapResource {
 	private Sensor sensor;
 	private Gson gson;
 	
+	/**
+	 * metodo constutor da classe
+	 * 
+	 * @param name - nome do recurso
+	 */
 	public DTHObservableResource(String name) {
 		super(name);
 		
 		this.gson = new Gson(); // Or use new GsonBuilder().create();
 		this.sensor = new Sensor();
 		
+		// seta sensor como observable
 		this.setObservable(true);
 		this.getAttributes().setObservable();
 
+		// instancia tarefa que retorna os dados lidos dos sensores
 		DTHSensorTask dthSensorTask = new DTHSensorTask(this, this.sensor);
 		
+		// inicia e configura periodicidade
 		Timer timer = new Timer();
 		timer.schedule(dthSensorTask, 0, TIME_TO_UPDATE);
 	}
 
+	/**
+	 * retorna mensagem com o estado atual do sensor
+	 */
 	@Override
 	public void handleGET(CoapExchange exchange) {
+		// converte objeto atual para JSON
 		String jsonInString = gson.toJson(this.sensor);
+		// retorna na resposta
 		exchange.respond(ResponseCode.CONTENT, jsonInString, MediaTypeRegistry.TEXT_PLAIN);
 	}
 
+	/**
+	 * TEST
+	 * altera estado atual do sensor
+	 */
 	@Override
 	public void handlePOST(CoapExchange exchange) {
 		String request = exchange.getRequestText();
+		
+		// converte JSON recebido em objeto
 		this.sensor = gson.fromJson(request, Sensor.class);
+
+		// notifica que o recurso foi modificado
 		this.changed();
 		
-		String jsonInString = gson.toJson(this.sensor);
-		String response = getName() + " has been configured to " + jsonInString;
-		exchange.respond(ResponseCode.CONTENT, response, MediaTypeRegistry.TEXT_PLAIN);
+		// retorna mensagem de sucesso
+		String response = getName() + " has been successful configured";
+		exchange.respond(ResponseCode.CONTENT, "{ message: " + response + " }", MediaTypeRegistry.TEXT_PLAIN);
 	}
 	
+	/**
+	 * metodo sobrescrito para atualizar o recurso pai caso o filho seja alterado
+	 */
 	@Override
 	public void changed() {
 		super.changed();

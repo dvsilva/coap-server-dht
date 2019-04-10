@@ -20,22 +20,23 @@ public class MyCoapServer extends CoapServer {
 	public static final String app_config_path = coap_path + resource_app_config;
 	public static final String sensors_path = coap_path + resource_sensors;
 	
+	/**
+	 * metodo que inicia o servidor
+	 * @param args
+	 */
 	public static void main(String[] args) {
 
 		MyCoapServer server = new MyCoapServer();
 
-		// all -- {"temperature":{"min":"15","max":"35"},"humidity":{"min":"50","max":"80"}}
-		// foreach --{min: 20; max:30 }
+		// adiciona recurso de configuracao
 		AppConfigResource configRes = new AppConfigResource(resource_app_config);
 		server.add(configRes);
 
-		// all -- {"temperature":{"value":"48","timestamp":"2019-04-05 10:44:55"},"humidity":{"value":"29","timestamp":"2019-04-05 10:44:55"},"timestamp":"2019-04-05 10:44:57"}
-		// foreach -- {"value":"26","timestamp":"2019-04-05 10:45:31"}
+		// adiciona recurso de sensores
 		SensorResource sensorsResource = new SensorResource(resource_sensors);
 		server.add(sensorsResource);
 		
-		// all - {"temperature-led":{"state":"LOW"},"humidity-led":{"state":"HIGH"}}
-		// foreach -- {"state":"LOW"}
+		// adiciona recurso de atuadores
 		ActuatorResource actuatorResource = new ActuatorResource(resource_actuators, resource_led, app_config_path, sensors_path);
 		server.add(actuatorResource);
 		

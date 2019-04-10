@@ -1,0 +1,68 @@
+/app-config
+
+GET 
+	response - {"temperature":{"min":15.0,"max":35.0},"humidity":{"min":50.0,"max":80.0}}
+POST 
+	outgoing - {"temperature":{"min":"15","max":"35"},"humidity":{"min":"50","max":"80"}}
+	response - { message: app-config has been successful configured }
+PUT
+	outgoing - {"temperature":{"min":"15","max":"35"},"humidity":{"min":"50","max":"80"}}
+	response - { message: app-config has been successful configured }
+	
+/app-config/temperature
+
+GET 
+	response - {"min":15.0,"max":35.0}
+POST
+	outgoing - {"min":"15","max":"35"}
+	response - { message: temperature has been successful configured }
+PUT
+	outgoing - {"min":"15","max":"35"}
+	response - { message: temperature has been successful configured }
+
+/app-config/humidity
+
+GET 
+	response - {"min":50.0,"max":80.0}
+POST
+	outgoing - {"min":"50","max":"80"}
+	response - { message: humidity has been successful configured }
+PUT
+	outgoing - {"min":"50","max":"80"}
+	response - { message: humidity has been successful configured }
+	
+/sensors
+
+GET 
+	response - {"temperature":{"value":28.0,"timestamp":"2019-04-10 10"},"humidity":{"value":77.0,"timestamp":"2019-04-10 10"},"timestamp":"2019-04-10 10:54:43"}
+	
+/sensors/temperature
+
+GET 
+	response - {"value":28.0,"timestamp":"2019-04-10 10"}
+	
+/sensors/humidity
+
+GET 
+	response - {"value":77.0,"timestamp":"2019-04-10 10"}	
+	
+/actuators
+
+GET
+	response - {"led":{"temperature_led":{"name":"temperature","port":"GPIO 1","pulsing":false,"state":"LOW"},"humidity_led":{"name":"humidity","port":"GPIO 4","pulsing":false,"state":"LOW"}}}
+
+/actuators/led
+
+GET
+	response - {"temperature_led":{"name":"temperature","port":"GPIO 1","pulsing":false,"state":"LOW"},"humidity_led":{"name":"humidity","port":"GPIO 4","pulsing":false,"state":"LOW"}}
+
+		
+/actuators/led/temperature
+
+GET
+	response - {"name":"temperature","port":"GPIO 1","pulsing":false,"state":"LOW"}
+		
+/actuators/led/humidity
+
+GET
+	response - {"name":"humidity","port":"GPIO 4","pulsing":false,"state":"LOW"}

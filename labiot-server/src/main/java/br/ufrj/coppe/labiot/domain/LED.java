@@ -33,7 +33,7 @@ public class LED {
 		this.pin.setShutdownOptions(true, PinState.LOW);
 		
 		this.name = name;
-		this.setPort(gpio.getName()); 
+		this.port = gpio.getName(); 
 		this.state = pin.getState().toString();
 	}
 
@@ -61,29 +61,45 @@ public class LED {
 		this.name = name;
 	}
 
+	/**
+	 * turn on the LED
+	 */
 	public void turnOn() {
 		//System.out.println("--> GPIO state should be: ON");
 		pin.high();
 		this.setState();
 	}
 
+	/**
+	 * turn off the LED
+	 */
 	public void turnOff() {
 		//System.out.println("--> GPIO state should be: OFF");
 		pin.low();
 		this.setState();
 	}
 	
+	/**
+	 * pulse the LED
+	 */
 	public void pulse(int value) {
 		// set second argument to 'true' use a blocking call
 		pin.pulse(value, true);
 		this.setState();
 	}
 
+	/**
+	 * change the state of the LED to one different that has now
+	 */
 	public void toggle() {
 		this.pin.toggle();
 		this.setState();
 	}
 	
+	/**
+	 * blink the LED
+	 * @param value - time in miliseconds
+	 */
 	public void blink(int value) {
 		pin.blink(value); 
 		this.setState();
@@ -97,10 +113,18 @@ public class LED {
 		this.state = pin.getState().toString();
 	}
 	
+	/**
+	 * 
+	 * @return Boolean - true if the pin is High
+	 */
 	public boolean isOn() {
 		return pin.getState() == PinState.HIGH;
 	}
-
+	
+	/**
+	 * 
+	 * @return Boolean - true if the pin is Low
+	 */
 	public boolean isOff() {
 		return pin.getState() == PinState.LOW;
 	}
@@ -113,6 +137,11 @@ public class LED {
 		this.port = port;
 	}
 
+	/**
+	 * Update the state of the pin
+	 * 
+	 * @param newState - New state
+	 */
 	public void update(String newState) {
 		if (newState.equalsIgnoreCase(PinState.HIGH.getName()))
 			pin.high();

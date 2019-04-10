@@ -21,7 +21,12 @@ public class LEDPropertieResource extends CoapResource {
 	private Gson gson;
 	
 	private LEDSensorClient sensorClient;
-
+	
+	/**
+	 * metodo constutor da classe
+	 * 
+	 * @param name - nome do recurso
+	 */
 	public LEDPropertieResource(Pin gpio, String propName, String sensorPath, String appConfigPath) {
 		super(propName);
 		
@@ -31,37 +36,57 @@ public class LEDPropertieResource extends CoapResource {
 		sensorPath += "/" + propName;
 		appConfigPath += "/" + propName;
 		
+		// instancia um cliente para obter valores dos sensores
 		this.sensorClient = new LEDSensorClient(sensorPath, appConfigPath);
 
+		// instancia tarefa que vai controlar o estado dos LEDs quanto ligar ou nao
 		TurnOnLEDTask turnOnTask = new TurnOnLEDTask(this);
-		
+
+		// inicia e configura periodicidade
 		Timer timer = new Timer();
 		timer.schedule(turnOnTask, 0, TIME_TO_UPDATE);
 	}
 
+	/**
+	 * retorna mensagem com o estado atual do LED
+	 */
 	@Override
 	public void handleGET(CoapExchange exchange) {
+		// converte objeto atual para JSON
 		String jsonInString = gson.toJson(this.led);
+		// retorna na resposta
 		exchange.respond(ResponseCode.CONTENT, jsonInString, MediaTypeRegistry.TEXT_PLAIN);
 	}
 	
+	/**
+	 * TEST
+	 * altera estado atual do LED
+	 */
 	@Override
 	public void handlePOST(CoapExchange exchange) {
 		String request = exchange.getRequestText();
+		
+		// converte JSON recebido em objeto
 		LED led = gson.fromJson(request, LED.class);
-		
+
+		// seta os valores
 		update(led.getState());
-		
+
+		// notifica que o recurso foi modificado
 		this.changed();
-		
-		String jsonInString = gson.toJson(led);
-		String response = getName() + " led has been configured to " + jsonInString;
+
+		// retorna mensagem de sucesso
+		String response = getName() + " has been successful configured";
 		exchange.respond(ResponseCode.CONTENT, response, MediaTypeRegistry.TEXT_PLAIN);
 	}
 	
+	/**
+	 * metodo sobrescrito para atualizar o recurso pai caso o filho seja alterado
+	 */
 	@Override
 	public void changed() {
 		super.changed();
+		
 		LEDResource parent = (LEDResource) this.getParent();
 		parent.changed();
 	}
